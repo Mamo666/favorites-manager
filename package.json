@@ -1,0 +1,205 @@
+{
+  "name": "favorites-manager",
+  "displayName": "Favorites Manager",
+  "description": "Pin any file or folder to a persistent sidebar with aliases, groups and drag-and-drop reordering",
+  "version": "0.2.0",
+  "publisher": "mamozhang",
+  "author": {
+    "name": "mamozhang & Claude",
+    "url": "https://github.com/mamozhang"
+  },
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": ["Other"],
+  "keywords": ["favorites", "bookmark", "sidebar", "file manager", "alias"],
+  "icon": "resources/icons/favorite.png",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mamozhang/favorites-manager"
+  },
+  "bugs": {
+    "url": "https://github.com/mamozhang/favorites-manager/issues"
+  },
+  "homepage": "https://github.com/mamozhang/favorites-manager#readme",
+  "activationEvents": ["onStartupFinished"],
+  "main": "./out/extension.js",
+  "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "favoritesContainer",
+          "title": "Favorites",
+          "icon": "resources/icons/favorite.svg"
+        }
+      ]
+    },
+    "views": {
+      "favoritesContainer": [
+        {
+          "id": "favoritesView",
+          "name": "Favorites",
+          "contextualTitle": "Favorites Manager"
+        }
+      ]
+    },
+    "commands": [
+      {
+        "command": "favorites.addFile",
+        "title": ">>狠狠收藏了 OvO<<",
+        "category": "Favorites"
+      },
+      {
+        "command": "favorites.removeItem",
+        "title": "Remove from Favorites",
+        "category": "Favorites",
+        "icon": "$(trash)"
+      },
+      {
+        "command": "favorites.renameAlias",
+        "title": "Set Alias…",
+        "category": "Favorites",
+        "icon": "$(edit)"
+      },
+      {
+        "command": "favorites.openItem",
+        "title": "Open (Preview Only)",
+        "category": "Favorites",
+        "icon": "$(go-to-file)"
+      },
+      {
+        "command": "favorites.openAndReveal",
+        "title": "Open and Reveal in Explorer",
+        "category": "Favorites"
+      },
+      {
+        "command": "favorites.revealInExplorer",
+        "title": "Reveal in Explorer",
+        "category": "Favorites",
+        "icon": "$(file-symlink-file)"
+      },
+      {
+        "command": "favorites.moveToGroup",
+        "title": "Move to Group…",
+        "category": "Favorites"
+      },
+      {
+        "command": "favorites.createGroup",
+        "title": "New Group…",
+        "category": "Favorites",
+        "icon": "$(add)"
+      },
+      {
+        "command": "favorites.renameGroup",
+        "title": "Rename Group…",
+        "category": "Favorites"
+      },
+      {
+        "command": "favorites.deleteGroup",
+        "title": "Delete Group…",
+        "category": "Favorites"
+      },
+      {
+        "command": "favorites.setFilter",
+        "title": "Filter Favorites…",
+        "category": "Favorites",
+        "icon": "$(filter)"
+      },
+      {
+        "command": "favorites.clearFilter",
+        "title": "Clear Filter",
+        "category": "Favorites",
+        "icon": "$(clear-all)"
+      },
+      {
+        "command": "favorites.refresh",
+        "title": "Refresh",
+        "category": "Favorites",
+        "icon": "$(refresh)"
+      }
+    ],
+    "menus": {
+      "explorer/context": [
+        {
+          "command": "favorites.addFile",
+          "group": "0_fav@1"
+        }
+      ],
+      "view/title": [
+        {
+          "command": "favorites.createGroup",
+          "when": "view == favoritesView",
+          "group": "navigation@1"
+        },
+        {
+          "command": "favorites.setFilter",
+          "when": "view == favoritesView",
+          "group": "navigation@2"
+        },
+        {
+          "command": "favorites.clearFilter",
+          "when": "view == favoritesView && favorites.filterActive",
+          "group": "navigation@3"
+        },
+        {
+          "command": "favorites.refresh",
+          "when": "view == favoritesView",
+          "group": "navigation@4"
+        }
+      ],
+      "view/item/context": [
+        {
+          "command": "favorites.openItem",
+          "when": "view == favoritesView && viewItem =~ /^favoriteItem/",
+          "group": "inline@1"
+        },
+        {
+          "command": "favorites.renameAlias",
+          "when": "view == favoritesView && viewItem =~ /^favoriteItem/",
+          "group": "inline@2"
+        },
+        {
+          "command": "favorites.removeItem",
+          "when": "view == favoritesView && viewItem =~ /^favoriteItem/",
+          "group": "inline@3"
+        },
+        {
+          "command": "favorites.moveToGroup",
+          "when": "view == favoritesView && viewItem =~ /^favoriteItem/",
+          "group": "1_modify@1"
+        },
+        {
+          "command": "favorites.revealInExplorer",
+          "when": "view == favoritesView && viewItem =~ /^favoriteItem/",
+          "group": "1_modify@2"
+        },
+        {
+          "command": "favorites.renameGroup",
+          "when": "view == favoritesView && viewItem == groupItem",
+          "group": "inline@1"
+        },
+        {
+          "command": "favorites.deleteGroup",
+          "when": "view == favoritesView && viewItem == groupItem",
+          "group": "inline@2"
+        }
+      ]
+    }
+  },
+  "scripts": {
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "lint": "eslint src --ext ts",
+    "package": "vsce package --no-dependencies",
+    "vscode:prepublish": "npm run compile"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@types/vscode": "^1.85.0",
+    "typescript": "^5.3.0",
+    "@typescript-eslint/eslint-plugin": "^6.0.0",
+    "@typescript-eslint/parser": "^6.0.0",
+    "eslint": "^8.0.0",
+    "@vscode/vsce": "^2.22.0"
+  }
+}
