@@ -24,18 +24,18 @@ export class GroupTreeItem extends vscode.TreeItem {
 
 export class FavItemTreeItem extends vscode.TreeItem {
   constructor(public readonly item: FavoriteItemRuntime) {
-    super('', vscode.TreeItemCollapsibleState.None);
+    super('', item.kind === FavoriteKind.Folder && item.health !== ItemHealth.Missing
+      ? vscode.TreeItemCollapsibleState.Collapsed
+      : vscode.TreeItemCollapsibleState.None
+    );
 
     const basename  = path.basename(item.fsPath);
     const isMissing = item.health === ItemHealth.Missing;
 
-    // ── Label: "alias  originalName" or just "originalName" ──────────────────
+    // ── Label: "alias  (originalName)" or just "originalName" ────────────────
     if (item.alias) {
-      // Use TreeItemLabel with highlights to bold the alias portion
-      this.label = {
-        label:      `${item.alias}  (${basename})`,
-        highlights: [[0, item.alias.length]],
-      } as vscode.TreeItemLabel;
+      // Plain string label — no highlights, no background colour
+      this.label       = `${item.alias}  (${basename})`;
       this.description = path.dirname(item.fsPath);
     } else {
       this.label       = basename;
@@ -58,10 +58,9 @@ export class FavItemTreeItem extends vscode.TreeItem {
         'warning',
         new vscode.ThemeColor('problemsWarningIcon.foreground')
       );
-    } else if (item.kind === FavoriteKind.Folder) {
-      this.iconPath = vscode.ThemeIcon.Folder;
     } else {
-      // Let VS Code apply the user's file-icon theme automatically
+      // Both files and folders: use resourceUri so the file-icon-theme
+      // renders them with consistent padding/alignment
       this.resourceUri = vscode.Uri.file(item.fsPath);
     }
 

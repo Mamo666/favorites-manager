@@ -1,11 +1,13 @@
 import * as vscode from 'vscode';
 import * as fs     from 'fs';
+import * as path   from 'path';
 import { FavoritesStore }                from '../storage/FavoritesStore';
 import { FilterController }              from './FilterController';
 import { GroupTreeItem, FavItemTreeItem } from './FavoriteTreeItem';
-import { FavoriteGroup, FavoriteItem, FavoriteItemRuntime, ItemHealth } from '../types';
+import { FsEntryTreeItem }               from './FsEntryTreeItem';
+import { FavoriteGroup, FavoriteItem, FavoriteItemRuntime, ItemHealth, FavoriteKind } from '../types';
 
-type AnyTreeItem = GroupTreeItem | FavItemTreeItem;
+type AnyTreeItem = GroupTreeItem | FavItemTreeItem | FsEntryTreeItem;
 
 const DND_MIME = 'application/vnd.code.tree.favoritesview';
 
@@ -82,14 +84,42 @@ export class FavoritesTreeProvider
     return element;
   }
 
-  getChildren(element?: AnyTreeItem): AnyTreeItem[] {
+  getChildren(element?: AnyTreeItem): vscode.ProviderResult<AnyTreeItem[]> {
     if (!element) {
       return this.getRootChildren();
     }
     if (element instanceof GroupTreeItem) {
       return this.getGroupChildren(element.group);
     }
+    // Expand a favorited folder to browse its real filesystem contents
+    if (element instanceof FavItemTreeItem && element.item.kind === FavoriteKind.Folder) {
+      return this.getFsChildren(element.item.fsPath);
+    }
+    // Recursively expand sub-directories inside a favorited folder
+    if (element instanceof FsEntryTreeItem &&
+        (element.entryKind & vscode.FileType.Directory) !== 0) {
+      return this.getFsChildren(element.fsPath);
+    }
     return [];
+  }
+
+  // ── Filesystem children (for favorited & sub-folders) ────────────────────
+
+  private async getFsChildren(dirPath: string): Promise<FsEntryTreeItem[]> {
+    try {
+      const entries = await vscode.workspace.fs.readDirectory(vscode.Uri.file(dirPath));
+      return entries
+        .sort(([aName, aType], [bName, bType]) => {
+          // Directories first, then alphabetical
+          const aIsDir = (aType & vscode.FileType.Directory) !== 0;
+          const bIsDir = (bType & vscode.FileType.Directory) !== 0;
+          if (aIsDir !== bIsDir) { return aIsDir ? -1 : 1; }
+          return aName.localeCompare(bName);
+        })
+        .map(([name, type]) => new FsEntryTreeItem(path.join(dirPath, name), type));
+    } catch {
+      return [];
+    }
   }
 
   // ── Root level: top-level groups + ungrouped items ────────────────────────

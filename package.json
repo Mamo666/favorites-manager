@@ -2,7 +2,7 @@
   "name": "favorites-manager",
   "displayName": "Favorites Manager",
   "description": "Pin any file or folder to a persistent sidebar with aliases, groups and drag-and-drop reordering",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "publisher": "mamozhang",
   "author": {
     "name": "mamozhang & Claude",
@@ -125,6 +125,12 @@
           "group": "0_fav@1"
         }
       ],
+      "editor/title/context": [
+        {
+          "command": "favorites.addFile",
+          "group": "0_fav@1"
+        }
+      ],
       "view/title": [
         {
           "command": "favorites.createGroup",
@@ -182,6 +188,11 @@
           "command": "favorites.deleteGroup",
           "when": "view == favoritesView && viewItem == groupItem",
           "group": "inline@2"
+        },
+        {
+          "command": "favorites.addFile",
+          "when": "view == favoritesView && viewItem =~ /^fsEntry/",
+          "group": "0_fav@1"
         }
       ]
     }

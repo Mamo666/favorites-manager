@@ -70,22 +70,11 @@ export async function addToFavorites(
   });
   if (alias === undefined) { return; } // Escape = cancel entire flow
 
-  // ── Duplicate guard ───────────────────────────────────────────────────────
   const added = await store.addItem(fsPath, kind, groupId, alias);
   if (added === null) {
-    const existingItem = store.getItems().find(i => i.fsPath === fsPath)!;
-    const groupLabel = existingItem.groupId
-      ? (groups.find(g => g.id === existingItem.groupId)?.label ?? 'unknown group')
-      : 'Ungrouped';
-
-    const choice = await vscode.window.showWarningMessage(
-      `"${path.basename(fsPath)}" is already in favorites (in "${groupLabel}").`,
-      'Move to Different Group',
-      'OK'
+    vscode.window.showWarningMessage(
+      `"${path.basename(fsPath)}" is already in this group.`
     );
-    if (choice === 'Move to Different Group') {
-      vscode.commands.executeCommand('favorites.moveToGroup', { id: existingItem.id });
-    }
     return;
   }
 

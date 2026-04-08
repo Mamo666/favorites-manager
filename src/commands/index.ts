@@ -8,6 +8,7 @@ import { renameAlias }           from './renameAlias';
 import { moveToGroup }           from './moveToGroup';
 import { createGroup, renameGroup, deleteGroup } from './groupCommands';
 import { FavItemTreeItem, GroupTreeItem }        from '../tree/FavoriteTreeItem';
+import { FsEntryTreeItem }                        from '../tree/FsEntryTreeItem';
 import { ItemHealth, FavoriteKind }              from '../types';
 
 export function registerAllCommands(
@@ -21,10 +22,15 @@ export function registerAllCommands(
   const reg = (id: string, fn: (...args: any[]) => unknown) =>
     ctx.subscriptions.push(vscode.commands.registerCommand(id, fn));
 
-  // ── Add to favorites (from explorer right-click) ──────────────────────────
-  reg(CMD.ADD_FILE, (uri?: vscode.Uri) =>
-    addToFavorites(uri, store, provider)
-  );
+  // ── Add to favorites (from explorer right-click or fsEntry right-click) ──
+  reg(CMD.ADD_FILE, (uriOrNode?: vscode.Uri | FsEntryTreeItem) => {
+    // When invoked from view/item/context on an FsEntryTreeItem, VS Code passes
+    // the tree node; extract its resourceUri for the add flow.
+    const uri = uriOrNode instanceof FsEntryTreeItem
+      ? uriOrNode.resourceUri
+      : uriOrNode as vscode.Uri | undefined;
+    return addToFavorites(uri, store, provider);
+  });
 
   // ── Remove item ───────────────────────────────────────────────────────────
   reg(CMD.REMOVE_ITEM, async (node?: FavItemTreeItem) => {

@@ -47,7 +47,9 @@ export class FavoritesStore {
     groupId: string | null,
     alias?: string | null
   ): Promise<FavoriteItem | null> {
-    const duplicate = this.data.items.find(i => i.fsPath === fsPath);
+    const duplicate = this.data.items.find(
+      i => i.fsPath === fsPath && i.groupId === (groupId ?? null)
+    );
     if (duplicate) { return null; }
 
     const item: FavoriteItem = {
